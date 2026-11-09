@@ -34,3 +34,4 @@ use the editor.
 - Milestone approval/revision runs only through the `decide_milestone` DB function; freelancers join via `join_project` (invite matched by email).
 - PayPal calls go through the connector gateway (src/lib/paypal.server.ts); payment amount always comes from the approved milestone row, never the client.
 - AI agents use src/lib/ai.server.ts (streamed Responses call with strict structured output); AI is advisory and never changes approval or payment state.
+- DB guards: new milestones must be inserted as `pending`, a project's assigned freelancer/client can't be changed after assignment (trigger `guard_project_freelancer`), projects with payments can't be deleted, and profiles are visible only to self and project collaborators — keeps the approve→pay flow and payee un-bypassable.
