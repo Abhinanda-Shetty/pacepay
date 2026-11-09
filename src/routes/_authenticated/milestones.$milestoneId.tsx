@@ -10,6 +10,7 @@ import { reviewSubmission } from "@/lib/pacepay.functions";
 import { money, date } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PayPalButton } from "@/components/PayPalButton";
+import { AIReview } from "@/components/AIReview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -139,22 +140,6 @@ function Evidence({ urls, files }: { urls: string[]; files: string[] }) {
     <div className="mt-3 flex flex-wrap gap-2">
       {urls.map((u) => <a key={u} href={u} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs hover:text-primary"><Link2 className="h-3 w-3" />{u.replace(/^https?:\/\//, "").slice(0, 40)}</a>)}
       {files.map((f) => <button key={f} onClick={() => open(f)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs hover:text-primary"><Paperclip className="h-3 w-3" />{f.split("/").pop()}</button>)}
-    </div>
-  );
-}
-
-export function AIReview({ r }: { r: any }) {
-  const list = (t: string, items: string[], cls: string) => items?.length ? <div><p className={`text-xs font-medium ${cls}`}>{t}</p><ul className="mt-1 list-disc pl-5 text-xs text-muted-foreground">{items.map((i) => <li key={i}>{i}</li>)}</ul></div> : null;
-  return (
-    <div className="mt-4 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-      <div className="flex flex-wrap items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><span className="text-sm font-medium">AI evaluation</span><StatusBadge status={r.recommendation} /><span className="font-mono text-xs text-muted-foreground">confidence {Math.round(Number(r.confidence) * 100)}%</span></div>
-      <p className="text-sm">{r.summary}</p>
-      <div className="grid gap-3 md:grid-cols-3">
-        {list("Satisfied", r.requirements_satisfied, "text-primary")}
-        {list("Missing", r.missing_requirements, "text-destructive")}
-        {list("Issues", r.issues, "text-warning")}
-      </div>
-      <p className="text-xs text-muted-foreground">AI is advisory only — the client makes the final decision.</p>
     </div>
   );
 }
