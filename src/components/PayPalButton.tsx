@@ -8,7 +8,7 @@ declare global {
 }
 
 function loadSdk(currency: string) {
-  const clientId = import.meta.env.VITE_LOVABLE_CONNECTOR_PAYPAL_CLIENT_ID;
+  const clientId = import.meta.env["VITE_LOVABLE_CONNECTOR_PAYPAL_CLIENT_ID"];
   if (!clientId) return Promise.reject(new Error("PayPal client ID is not configured"));
   const src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=capture`;
   const existing = document.querySelector<HTMLScriptElement>(`script[data-pp="${currency}"]`);
@@ -16,7 +16,7 @@ function loadSdk(currency: string) {
   return new Promise<void>((res, rej) => {
     const s = existing ?? document.createElement("script");
     s.src = src;
-    s.dataset.pp = currency;
+    s.dataset["pp"] = currency;
     s.onload = () => res();
     s.onerror = () => rej(new Error("Failed to load PayPal"));
     if (!existing) document.body.appendChild(s);

@@ -34,7 +34,7 @@ function NewProject() {
   const total = ms.reduce((s, m) => s + Number(m.amount || 0), 0);
 
   async function runPlan() {
-    if (!f.title) return toast.error("Add a title first");
+    if (!f.title) { toast.error("Add a title first"); return; }
     setPlanning(true);
     try {
       const r = await plan({ data: { title: f.title, description: f.description, requirements: f.requirements, budget: Number(f.budget), currency: f.currency, deadline: f.deadline || null } });
@@ -49,15 +49,15 @@ function NewProject() {
   }
 
   async function save() {
-    if (!f.title) return toast.error("Title is required");
-    if (ms.some((m) => !m.title)) return toast.error("Every milestone needs a title");
+    if (!f.title) { toast.error("Title is required"); return; }
+    if (ms.some((m) => !m.title)) { toast.error("Every milestone needs a title"); return; }
     setSaving(true);
     const { data: p, error } = await supabase
       .from("projects")
       .insert({ title: f.title, description: f.description, requirements: f.requirements, budget: Number(f.budget), currency: f.currency, deadline: f.deadline || null, freelancer_email: f.freelancer_email.trim() || null, client_id: me!.user.id, start_date: new Date().toISOString().slice(0, 10) })
       .select()
       .single();
-    if (error || !p) { setSaving(false); return toast.error(error?.message ?? "Failed"); }
+    if (error || !p) { setSaving(false); { toast.error(error?.message ?? "Failed"); return; } }
     if (ms.length) {
       const { error: e2 } = await supabase.from("milestones").insert(ms.map((m, i) => ({ ...m, amount: Number(m.amount), deadline: m.deadline || null, project_id: p.id, currency: f.currency, sequence: i + 1 })));
       if (e2) toast.error(e2.message);

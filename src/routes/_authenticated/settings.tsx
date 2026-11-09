@@ -18,11 +18,11 @@ function Settings() {
   useEffect(() => setName(me?.profile?.name ?? ""), [me?.profile?.name]);
   async function save() {
     const { error } = await supabase.from("profiles").update({ name, updated_at: new Date().toISOString() }).eq("id", me!.user.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Profile saved");
     refetch();
   }
-  const paypalReady = Boolean(import.meta.env.VITE_LOVABLE_CONNECTOR_PAYPAL_CLIENT_ID);
+  const paypalReady = Boolean(import.meta.env["VITE_LOVABLE_CONNECTOR_PAYPAL_CLIENT_ID"]);
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-3xl font-bold">Settings</h1>

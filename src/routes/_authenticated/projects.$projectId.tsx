@@ -38,13 +38,13 @@ function ProjectPage() {
 
   async function invite() {
     const { error } = await supabase.from("projects").update({ freelancer_email: email.trim(), updated_at: new Date().toISOString() }).eq("id", p!.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Invite saved — the freelancer will see it after signing in with that email");
     qc.invalidateQueries({ queryKey: ["project", projectId] });
   }
   async function setStatus(status: "active" | "completed" | "cancelled") {
     const { error } = await supabase.from("projects").update({ status }).eq("id", p!.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["project", projectId] });
   }
 

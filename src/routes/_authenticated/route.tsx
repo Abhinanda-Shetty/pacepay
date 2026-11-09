@@ -89,7 +89,7 @@ function Onboarding({ userId, onDone }: { userId: string; onDone: () => void }) 
     setBusy(true);
     const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Welcome aboard, ${role}!`);
     onDone();
   }

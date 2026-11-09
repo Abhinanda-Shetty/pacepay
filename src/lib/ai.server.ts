@@ -7,7 +7,7 @@ const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
 /** Streams a structured Responses call through Lovable AI Gateway and returns the parsed object. */
 export async function runStructured<T>(schema: z.ZodType<T>, instructions: string, prompt: string): Promise<T> {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured (missing LOVABLE_API_KEY).");
   let runId: string | undefined;
   const provider = createOpenAI({

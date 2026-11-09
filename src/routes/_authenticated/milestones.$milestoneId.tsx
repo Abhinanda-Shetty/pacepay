@@ -132,7 +132,7 @@ function Box({ title, text }: { title: string; text: string }) {
 function Evidence({ urls, files }: { urls: string[]; files: string[] }) {
   async function open(path: string) {
     const { data, error } = await supabase.storage.from("evidence").createSignedUrl(path, 300);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     window.open(data.signedUrl, "_blank", "noopener");
   }
   if (!urls.length && !files.length) return null;
@@ -150,19 +150,19 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
   const [files, setFiles] = useState<FileList | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit() {
-    if (desc.trim().length < 10) return toast.error("Describe what you delivered (10+ characters)");
+    if (desc.trim().length < 10) { toast.error("Describe what you delivered (10+ characters)"); return; }
     setBusy(true);
     const paths: string[] = [];
     for (const f of Array.from(files ?? [])) {
       const path = `${m.project_id}/${m.id}/${Date.now()}-${f.name.replace(/[^\w.-]/g, "_")}`;
       const { error } = await supabase.storage.from("evidence").upload(path, f);
-      if (error) { setBusy(false); return toast.error(error.message); }
+      if (error) { setBusy(false); { toast.error(error.message); return; } }
       paths.push(path);
     }
     const evidence_urls = urls.split(/\s+/).map((u) => u.trim()).filter((u) => /^https?:\/\//.test(u));
     const { data, error } = await supabase.from("submissions").insert({ milestone_id: m.id, project_id: m.project_id, submitted_by: userId, description: desc, evidence_urls, evidence_files: paths, version }).select().single();
     setBusy(false);
-    if (error || !data) return toast.error(error?.message ?? "Failed");
+    if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
     toast.success("Submitted — running AI review…");
     setDesc(""); setUrls(""); setFiles(null);
     onDone(data.id);
@@ -181,9 +181,9 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
 function Decision({ submissionId, onDone }: { submissionId: string; onDone: () => void }) {
   const [comments, setComments] = useState("");
   async function decide(approve: boolean) {
-    if (!approve && !comments.trim()) return toast.error("Tell the freelancer what to revise");
+    if (!approve && !comments.trim()) { toast.error("Tell the freelancer what to revise"); return; }
     const { error } = await supabase.rpc("decide_milestone", { _submission_id: submissionId, _approve: approve, _comments: comments });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(approve ? "Milestone approved" : "Revision requested");
     onDone();
   }

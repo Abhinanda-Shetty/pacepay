@@ -24,7 +24,7 @@ function Projects() {
 
   async function join(id: string) {
     const { error } = await supabase.rpc("join_project", { _project_id: id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("You joined the project");
     qc.invalidateQueries();
   }
