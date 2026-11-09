@@ -16,7 +16,16 @@ export async function paypal<T = any>(path: string, init: RequestInit = {}): Pro
   });
   const text = await res.text();
   if (!res.ok) {
-    console.error(`PayPal ${res.status}: ${text}`);
+    let info: any = {};
+    try { info = JSON.parse(text); } catch {}
+    console.error("PayPal API error", JSON.stringify({
+      status: res.status,
+      path,
+      name: info?.name,
+      issues: (info?.details ?? []).map((d: any) => d?.issue),
+      description: info?.details?.[0]?.description ?? info?.message,
+      debug_id: info?.debug_id,
+    }));
     throw new Error(`PayPal request failed [${res.status}]: ${text.slice(0, 300)}`);
   }
   return (text ? JSON.parse(text) : {}) as T;
