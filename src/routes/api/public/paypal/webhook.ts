@@ -6,7 +6,7 @@ export const Route = createFileRoute("/api/public/paypal/webhook")({
     handlers: {
       POST: async ({ request }) => {
         const webhookId = process.env["PAYPAL_WEBHOOK_ID"];
-        if (!webhookId) return new Response("Webhook not configured", { status: 503 });
+        if (!webhookId) return new Response("Webhook not configured", { status: 501 });
         const raw = await request.text();
         let event: any;
         try { event = JSON.parse(raw); } catch { return new Response("Bad JSON", { status: 400 }); }
