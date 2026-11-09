@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## PacePay architecture
+- Privileged writes (ai_reviews, payments, paid status, system notifications) go through server functions in src/lib/pacepay.functions.ts using the admin client after an RLS-scoped authorization check; authenticated users have read-only grants on those tables so the browser can't forge them.
+- Milestone approval/revision runs only through the `decide_milestone` DB function; freelancers join via `join_project` (invite matched by email).
+- PayPal calls go through the connector gateway (src/lib/paypal.server.ts); payment amount always comes from the approved milestone row, never the client.
+- AI agents use src/lib/ai.server.ts (streamed Responses call with strict structured output); AI is advisory and never changes approval or payment state.
