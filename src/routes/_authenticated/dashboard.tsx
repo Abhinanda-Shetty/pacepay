@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Panel, Empty } from "@/components/Panel";
+import { getOwnProjects } from "@/lib/project-access";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — PacePay" }, { name: "description", content: "Your PacePay overview." }, { property: "og:title", content: "Dashboard — PacePay" }, { property: "og:description", content: "Projects, approvals and payments at a glance." }] }),
@@ -38,7 +39,7 @@ function Dashboard() {
       return { projects: p.data ?? [], milestones: m.data ?? [], payments: pay.data ?? [], reviews: r.data ?? [] };
     },
   });
-  const projects = data?.projects ?? [];
+  const projects = getOwnProjects(data?.projects ?? [], me?.user.id ?? "", me?.role === "admin");
   const ms = data?.milestones ?? [];
   const active = projects.filter((p) => p.status === "active");
   const budget = active.reduce((s, p) => s + Number(p.budget), 0);

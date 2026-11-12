@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isOwnProject, isPendingInvite } from "@/lib/project-access";
+import { getOwnProjects, isOwnProject, isPendingInvite } from "@/lib/project-access";
 
 const publicJob = { client_id: "client-1", freelancer_id: null, freelancer_email: null };
 
@@ -17,5 +17,11 @@ describe("project invitations", () => {
   it("keeps unassigned public jobs out of the freelancer's own projects", () => {
     expect(isOwnProject(publicJob, "freelancer-1")).toBe(false);
     expect(isOwnProject({ ...publicJob, freelancer_id: "freelancer-1" }, "freelancer-1")).toBe(true);
+  });
+
+  it("gives a new account zero active projects when only another user's public job exists", () => {
+    const activePublicJob = { ...publicJob, status: "active" };
+    const ownProjects = getOwnProjects([activePublicJob], "new-user");
+    expect(ownProjects.filter((project) => project.status === "active")).toHaveLength(0);
   });
 });
