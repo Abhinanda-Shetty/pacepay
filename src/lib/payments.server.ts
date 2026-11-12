@@ -13,13 +13,11 @@ export async function syncPayment(pay: any) {
   if (r.captureId && ["completed", "refunded", "partially_refunded"].includes(r.status)) {
     const cap = await paypal(`/v2/payments/captures/${r.captureId}`);
     r = fromCaptureStatus(cap.status, r.captureId, cap.status_details?.reason);
-    const bd = cap.seller_receivable_breakdown;
     if (r.status === "refunded") refunded = Number(pay.amount);
     else if (r.status === "partially_refunded") {
       const { data: rows } = await supabaseAdmin.from("refunds").select("amount, status").eq("payment_id", pay.id);
       refunded = (rows ?? []).filter((x) => x.status === "COMPLETED").reduce((s, x) => s + Number(x.amount), 0);
     }
-    void bd;
   }
   // never downgrade a payment that was already verified as captured, except to a refund state
   if (FINAL.includes(pay.status) && !FINAL.includes(r.status)) return pay;
