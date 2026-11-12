@@ -36,6 +36,13 @@
       "when": 1794504295736,
       "tag": "0004_0004_ai_deliverable_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794512179103,
+      "tag": "0005_restrict_ratings_read",
+      "breakpoints": true
     }
   ]
 }
