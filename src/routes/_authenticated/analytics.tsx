@@ -121,7 +121,7 @@ function Analytics() {
             <AgGridReact<Row>
               ref={grid}
               theme={theme}
-              rowData={isLoading ? undefined : rows}
+              rowData={isLoading ? null : rows}
               columnDefs={cols}
               defaultColDef={{ sortable: true, resizable: true, flex: 1 }}
               quickFilterText={search}
