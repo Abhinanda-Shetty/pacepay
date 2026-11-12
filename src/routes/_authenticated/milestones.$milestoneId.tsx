@@ -163,6 +163,10 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
   const [busy, setBusy] = useState(false);
   async function submit() {
     if (desc.trim().length < 10) { toast.error("Describe what you delivered (10+ characters)"); return; }
+    const evidence_urls = urls.split(/\s+/).map((u) => u.trim()).filter(Boolean);
+    if (evidence_urls.length > 5 || evidence_urls.some((u) => !/^https?:\/\/\S+$/i.test(u))) { toast.error("Add up to 5 valid http(s) evidence links"); return; }
+    if ((files?.length ?? 0) > 8) { toast.error("Upload up to 8 files per submission"); return; }
+    if (Array.from(files ?? []).some((f) => f.size > 20 * 1024 * 1024)) { toast.error("Each file must be 20MB or smaller"); return; }
     setBusy(true);
     const paths: string[] = [];
     for (const f of Array.from(files ?? [])) {
