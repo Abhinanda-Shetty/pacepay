@@ -116,7 +116,7 @@ async function loadPayable(context: any, milestoneId: string) {
   return { ms, p };
 }
 
-const ACTIVE = ["created", "approved", "pending"];
+const ACTIVE = ["created", "approved", "pending"] as const;
 
 export const createPayPalOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

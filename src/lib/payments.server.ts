@@ -39,7 +39,7 @@ async function applyMilestoneEffects(pay: any, status: string) {
     if (changed?.length && pay.payee_id)
       await supabaseAdmin.from("notifications").insert({
         user_id: pay.payee_id, type: "payment",
-        title: `Payment received: ${changed[0].title}`,
+        title: `Payment received: ${changed[0]!.title}`,
         message: `${pay.currency} ${Number(pay.amount).toFixed(2)} was paid via PayPal.`,
         link: `/milestones/${pay.milestone_id}`,
       });

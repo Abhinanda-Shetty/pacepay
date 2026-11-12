@@ -25,7 +25,7 @@ describe("payment verification", () => {
   });
   it("order for another milestone fails", () => {
     const o = order("COMPLETED", { id: "C1", status: "COMPLETED", amount: { value: "60.00", currency_code: "USD" } });
-    o.purchase_units[0].reference_id = "other";
+    o.purchase_units[0]!.reference_id = "other";
     expect(evaluateOrder(o, exp).status).toBe("failed");
   });
   it("declined capture fails and voided order is cancelled", () => {
