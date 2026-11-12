@@ -234,7 +234,12 @@ export const capturePayPalOrder = createServerFn({ method: "POST" })
           status_detail: `Capture rejected: ${issues.join(", ") || "PayPal error"}`,
           updated_at: new Date().toISOString(),
         }).eq("id", pay.id);
-        throw new Error(retryable ? "PayPal declined that payment method. Choose another and try again." : `PayPal rejected the capture (${issues.join(", ") || "error"}).`);
+        const compliance = issues.some((i) => /COMPLIANCE|KYC|PAYER_ACCOUNT_RESTRICTED|PAYER_CANNOT_PAY|PAYEE_ACCOUNT_RESTRICTED|TRANSACTION_REFUSED|DECLINED_DUE_TO_RELATED_TXN/.test(i));
+        throw new Error(
+          retryable ? "PayPal declined that payment method. Choose another and try again."
+          : compliance ? "PayPal declined this transaction for regulatory/compliance reasons (an account restriction, not an app error). No money was taken and the milestone is still unpaid. Try a different PayPal account or contact PayPal."
+          : `PayPal rejected the capture (${issues.join(", ") || "error"}). No money was taken.`,
+        );
       }
     }
     // Always confirm from PayPal's own record of the order before changing status
