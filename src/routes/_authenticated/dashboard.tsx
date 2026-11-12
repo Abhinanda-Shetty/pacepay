@@ -39,7 +39,7 @@ function Dashboard() {
       return { projects: p.data ?? [], milestones: m.data ?? [], payments: pay.data ?? [], reviews: r.data ?? [] };
     },
   });
-  const projects = data?.projects ?? [];
+  const projects = getOwnProjects(data?.projects ?? [], me?.user.id ?? "", me?.role === "admin");
   const ms = data?.milestones ?? [];
   const active = projects.filter((p) => p.status === "active");
   const budget = active.reduce((s, p) => s + Number(p.budget), 0);
