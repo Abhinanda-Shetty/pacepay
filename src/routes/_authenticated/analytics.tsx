@@ -78,7 +78,7 @@ function Analytics() {
     { field: "amount", headerName: "Amount", filter: "agNumberColumnFilter", valueFormatter: (v) => money(v.value, v.data?.currency), minWidth: 110 },
     { field: "refunded", headerName: "Refunded", filter: "agNumberColumnFilter", valueFormatter: (v) => money(v.value, v.data?.currency), minWidth: 110 },
     { field: "net", headerName: "Net settled", filter: "agNumberColumnFilter", valueFormatter: (v) => money(v.value, v.data?.currency), minWidth: 120 },
-    { field: "currency", headerName: "Cur.", filter: true, width: 90 },
+    { field: "currency", headerName: "Currency", filter: true, minWidth: 110 },
     { field: "status", headerName: "Status", filter: true, valueFormatter: (v) => statusLabel(v.value ?? ""), minWidth: 130 },
     { field: "orderId", headerName: "PayPal order ID", filter: true, minWidth: 170 },
     { field: "captureId", headerName: "PayPal capture ID", filter: true, minWidth: 170 },
