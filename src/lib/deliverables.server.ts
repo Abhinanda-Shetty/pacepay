@@ -58,7 +58,7 @@ export function extractSourceArchive(bytes: Uint8Array) {
   const files = safeUnzip(bytes, 500, 30 * 1024 * 1024);
   const chunks: string[] = [];
   const names = Object.keys(files).filter((name) => !/(^|\/)(node_modules|dist|build|\.git|vendor|coverage)(\/|$)/i.test(name));
-  const candidates = names.filter((name) => SOURCE_EXTENSIONS.has(extension(name))).sort((a, b) => {
+  const candidates = names.filter((name) => SOURCE_EXTENSIONS.has(extension(name)) || /(^|\/)(readme|license|makefile|dockerfile|gemfile|procfile)(\.[^/]*)?$/i.test(name)).sort((a, b) => {
     const rank = (n: string) => /readme|package\.json|requirements\.txt|pyproject\.toml/i.test(n) ? 0 : /(^|\/)(src|app|lib|pages|routes|components)(\/|$)/i.test(n) ? 1 : 2;
     return rank(a) - rank(b) || a.localeCompare(b);
   });
