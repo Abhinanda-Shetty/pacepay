@@ -63,10 +63,19 @@ export function PayPalButton({ milestoneId, currency, onDone }: { milestoneId: s
             },
             onCancel: async (d: { orderID?: string }) => {
               if (d?.orderID) { try { await cancel({ data: { milestoneId, orderId: d.orderID } }); } catch {} }
-              toast.info("Payment cancelled. You can start a new one any time.");
+              toast.info("Payment not completed. If PayPal showed \"Transaction declined\", that account is restricted by PayPal — no money was taken. You can try again with another account.");
               onDone();
             },
-            onError: (e: any) => { setErr(String(e?.message ?? e)); setState("error"); },
+            onError: (e: any) => {
+              const raw = String(e?.message ?? e ?? "");
+              const msg = /compliance|regulation|declined|KYC|restricted/i.test(raw)
+                ? "PayPal declined this transaction to comply with international regulations. This is a restriction on the PayPal account, not PacePay. No money was taken and the milestone is still unpaid — try another PayPal account or contact PayPal support."
+                : `PayPal couldn't complete the payment. No money was taken. ${raw}`.trim();
+              toast.error(msg);
+              setErr(msg);
+              setState("error");
+              onDone();
+            },
           })
           .render(ref.current);
         setState("ready");
@@ -79,7 +88,7 @@ export function PayPalButton({ milestoneId, currency, onDone }: { milestoneId: s
     <div>
       {state === "loading" && <p className="text-sm text-muted-foreground">Loading PayPal…</p>}
       {state === "processing" && <p className="text-sm text-warning">Confirming payment with PayPal…</p>}
-      {state === "error" && <p className="text-sm text-destructive">{err}</p>}
+      {state === "error" && <div className="space-y-2"><p className="text-sm text-destructive">{err}</p><button type="button" className="text-sm underline" onClick={() => window.location.reload()}>Try again</button></div>}
       <div ref={ref} className="max-w-sm rounded-lg bg-foreground p-3" style={{ display: state === "processing" ? "none" : undefined }} />
     </div>
   );
