@@ -36,7 +36,7 @@ export async function runStructured<T>(schema: z.ZodType<T>, instructions: strin
   const result = streamText({
     model: provider.responses(AI_MODEL),
     instructions,
-    prompt,
+    ...(typeof prompt === "string" ? { prompt } : { messages: [{ role: "user" as const, content: prompt }] }),
     output: Output.object({ schema }),
     providerOptions: {
       openai: {
