@@ -11,6 +11,7 @@ describe("deliverable inspection", () => {
   it("reads source files from ZIP archives and excludes dependencies", () => {
     const archive = zipSync({
       "project/src/app.ts": strToU8("export const verified = true;"),
+      "project/README": strToU8("Hello World"),
       "project/node_modules/pkg/index.js": strToU8("secret dependency"),
     });
     const result = extractSourceArchive(archive);
