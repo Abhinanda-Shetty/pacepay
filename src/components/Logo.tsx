@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import logoMark from "@/assets/pacepay-logo-mark.png.asset.json";
+import logoFull from "@/assets/pacepay-logo-full.jpeg.asset.json";
 
 export function Logo() {
   return (
-    <Link to="/" aria-label="PacePay home" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
-      <img src={logoMark.url} alt="" className="h-8 w-8 rounded-lg" />
-      <span>Pace<span className="text-primary">Pay</span></span>
+    <Link to="/" aria-label="PacePay home" className="inline-flex shrink-0 items-center">
+      <img src={logoFull.url} alt="PacePay" className="h-14 w-20 rounded-lg object-cover object-center" />
     </Link>
   );
 }

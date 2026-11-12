@@ -19,8 +19,9 @@ function Projects() {
     queryKey: ["projects"],
     queryFn: async () => (await supabase.from("projects").select("*, milestones(status)").order("created_at", { ascending: false })).data ?? [],
   });
-  const invites = projects.filter((p) => !p.freelancer_id && p.client_id !== me?.user.id);
-  const mine = projects.filter((p) => !invites.includes(p));
+  const email = me?.user.email?.toLowerCase();
+  const invites = projects.filter((p) => !p.freelancer_id && p.client_id !== me?.user.id && p.freelancer_email?.toLowerCase() === email);
+  const mine = projects.filter((p) => me?.role === "admin" || p.client_id === me?.user.id || p.freelancer_id === me?.user.id);
 
   async function join(id: string) {
     const { error } = await supabase.rpc("join_project", { _project_id: id });
