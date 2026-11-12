@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type Role = "client" | "freelancer";
+export type Role = "client" | "freelancer" | "admin";
 
 export const meQuery = queryOptions({
   queryKey: ["me"],

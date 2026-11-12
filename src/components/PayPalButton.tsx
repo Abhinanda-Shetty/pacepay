@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { createPayPalOrder, capturePayPalOrder } from "@/lib/pacepay.functions";
+import { createPayPalOrder, capturePayPalOrder, cancelPayPalOrder } from "@/lib/pacepay.functions";
 
 declare global {
   interface Window { paypal?: any }
@@ -27,6 +27,8 @@ export function PayPalButton({ milestoneId, currency, onDone }: { milestoneId: s
   const ref = useRef<HTMLDivElement>(null);
   const createOrder = useServerFn(createPayPalOrder);
   const capture = useServerFn(capturePayPalOrder);
+  const cancel = useServerFn(cancelPayPalOrder);
+  const busy = useRef(false);
   const [state, setState] = useState<"loading" | "ready" | "processing" | "error">("loading");
   const [err, setErr] = useState("");
 
@@ -39,19 +41,31 @@ export function PayPalButton({ milestoneId, currency, onDone }: { milestoneId: s
         window.paypal
           .Buttons({
             style: { layout: "vertical", color: "gold", shape: "rect", label: "pay" },
-            createOrder: async () => (await createOrder({ data: { milestoneId } })).orderId,
+            createOrder: async () => {
+              if (busy.current) throw new Error("Payment already starting");
+              busy.current = true;
+              try { return (await createOrder({ data: { milestoneId } })).orderId; }
+              catch (e: any) { toast.error(e.message); throw e; }
+              finally { busy.current = false; }
+            },
             onApprove: async (d: { orderID: string }) => {
               setState("processing");
               try {
                 const r = await capture({ data: { milestoneId, orderId: d.orderID } });
                 if (r.status === "completed") toast.success(`Payment captured (${r.captureId})`);
+                else if (r.status === "pending") toast.warning("PayPal is still processing this payment. It will be marked paid once PayPal confirms.");
+                else if (r.status === "processing") toast.info("This payment is already being confirmed.");
                 else toast.warning(`Payment status: ${r.status}`);
               } catch (e: any) {
                 toast.error(e.message);
               }
               onDone();
             },
-            onCancel: () => toast.info("Payment cancelled"),
+            onCancel: async (d: { orderID?: string }) => {
+              if (d?.orderID) { try { await cancel({ data: { milestoneId, orderId: d.orderID } }); } catch {} }
+              toast.info("Payment cancelled. You can start a new one any time.");
+              onDone();
+            },
             onError: (e: any) => { setErr(String(e?.message ?? e)); setState("error"); },
           })
           .render(ref.current);
