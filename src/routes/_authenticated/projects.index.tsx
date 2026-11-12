@@ -6,6 +6,7 @@ import { useMe } from "@/hooks/use-me";
 import { money, date } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { isOwnProject, isPendingInvite } from "@/lib/project-access";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({ meta: [{ title: "Projects — PacePay" }, { name: "description", content: "All your PacePay projects." }, { property: "og:title", content: "Projects — PacePay" }, { property: "og:description", content: "Your projects and invites." }] }),
