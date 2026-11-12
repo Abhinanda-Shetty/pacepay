@@ -1,5 +1,14 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/paypal";
 
+export class PayPalError extends Error {
+  constructor(public status: number, public body: any, text: string) {
+    super(`PayPal request failed [${status}]: ${text.slice(0, 300)}`);
+  }
+  get issues(): string[] {
+    return (this.body?.details ?? []).map((d: any) => d?.issue).filter(Boolean);
+  }
+}
+
 export async function paypal<T = any>(path: string, init: RequestInit = {}): Promise<T> {
   const LOVABLE_API_KEY = process.env["LOVABLE_API_KEY"];
   const PAYPAL_API_KEY = process.env["PAYPAL_API_KEY"];
@@ -26,7 +35,7 @@ export async function paypal<T = any>(path: string, init: RequestInit = {}): Pro
       description: info?.details?.[0]?.description ?? info?.message,
       debug_id: info?.debug_id,
     }));
-    throw new Error(`PayPal request failed [${res.status}]: ${text.slice(0, 300)}`);
+    throw new PayPalError(res.status, info, text);
   }
   return (text ? JSON.parse(text) : {}) as T;
 }
