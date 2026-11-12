@@ -224,14 +224,14 @@ function CheckButton({ id, onDone }: { id: string; onDone: () => void }) {
   return <Button size="sm" variant="outline" disabled={busy} onClick={async () => { setBusy(true); try { const r = await check({ data: { paymentId: id } }); toast.info(`PayPal status: ${r.status.replace(/_/g, " ")}`); onDone(); } catch (e: any) { toast.error(e.message); } setBusy(false); }}>Check with PayPal</Button>;
 }
 
-function Disputes({ m, disputes, canOpen, isClient, userId, onDone }: { m: any; disputes: any[]; canOpen: boolean; isClient: boolean; userId?: string; onDone: () => void }) {
+function Disputes({ m, disputes, canOpen, isClient, userId, onDone }: { m: any; disputes: any[]; canOpen: boolean; isClient: boolean; userId: string | undefined; onDone: () => void }) {
   const [reason, setReason] = useState("");
   const [refund, setRefund] = useState("");
   const [show, setShow] = useState(false);
   async function open() {
-    if (reason.trim().length < 10) return toast.error("Explain the problem (10+ characters)");
+    if (reason.trim().length < 10) { toast.error("Explain the problem (10+ characters)"); return; }
     const { error } = await supabase.from("disputes").insert({ project_id: m.project_id, milestone_id: m.id, opened_by: userId!, reason: reason.trim(), requested_refund: m.status === "paid" && isClient && refund ? Number(refund) : null });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Dispute opened. A PacePay admin will review it.");
     setShow(false); setReason(""); setRefund(""); onDone();
   }

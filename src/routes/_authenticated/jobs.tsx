@@ -50,7 +50,7 @@ function Jobs() {
 
   async function withdraw(id: string) {
     const { error } = await supabase.rpc("withdraw_application", { _application_id: id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Application withdrawn");
     qc.invalidateQueries({ queryKey: ["my-applications"] });
   }
@@ -95,9 +95,9 @@ function ApplyDialog({ job, userId, onDone }: { job: any; userId: string; onDone
   const [letter, setLetter] = useState("");
   const [amount, setAmount] = useState("");
   async function apply() {
-    if (letter.trim().length < 10) return toast.error("Write at least a short pitch (10+ characters)");
+    if (letter.trim().length < 10) { toast.error("Write at least a short pitch (10+ characters)"); return; }
     const { error } = await supabase.from("applications").insert({ project_id: job.id, freelancer_id: userId, cover_letter: letter.trim(), proposed_amount: amount ? Number(amount) : null });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Application sent");
     setOpen(false); onDone();
   }
