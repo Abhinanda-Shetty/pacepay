@@ -175,7 +175,6 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
       if (error) { setBusy(false); { toast.error(error.message); return; } }
       paths.push(path);
     }
-    const evidence_urls = urls.split(/\s+/).map((u) => u.trim()).filter((u) => /^https?:\/\//.test(u));
     const { data, error } = await supabase.from("submissions").insert({ milestone_id: m.id, project_id: m.project_id, submitted_by: userId, description: desc, evidence_urls, evidence_files: paths, version }).select().single();
     setBusy(false);
     if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
