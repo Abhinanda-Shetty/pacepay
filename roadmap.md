@@ -12,3 +12,4 @@
 - [x] AI deliverable verification: inspect files, screenshots, websites and public GitHub repos on the backend
 - [x] Requirement-wise AI reports, evidence details, resubmission history and reinspection
 - [x] End-to-end verification without changing client approval authority or PayPal Sandbox behavior
+- [x] AG Grid analytics page (role-scoped, real data, CSV export)

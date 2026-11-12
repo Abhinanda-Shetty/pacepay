@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { LayoutDashboard, FolderKanban, Sparkles, CreditCard, Bell, Settings, LogOut, Briefcase, UserRound, Search, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Sparkles, CreditCard, Bell, Settings, LogOut, Briefcase, UserRound, Search, ShieldCheck, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, type Role } from "@/hooks/use-me";
@@ -25,6 +25,7 @@ const allNav = [
   { to: "/admin", label: "Disputes", icon: ShieldCheck },
   { to: "/ai", label: "AI Workflow", icon: Sparkles },
   { to: "/payments", label: "Payments", icon: CreditCard },
+  { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
