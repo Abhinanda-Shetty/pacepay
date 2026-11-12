@@ -187,7 +187,7 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
       <h2 className="text-lg font-semibold">Submit work {version > 1 && <span className="font-mono text-sm text-muted-foreground">(v{version})</span>}</h2>
       <div className="space-y-1.5"><Label>What did you deliver?</Label><Textarea rows={5} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Explain how each requirement is met…" /></div>
       <div className="space-y-1.5"><Label>Evidence links (space or newline separated)</Label><Textarea rows={2} value={urls} onChange={(e) => setUrls(e.target.value)} placeholder="https://github.com/… https://staging.example.com" /></div>
-      <div className="space-y-1.5"><Label>Files (max 20MB each)</Label><Input type="file" multiple onChange={(e) => setFiles(e.target.files)} /></div>
+      <div className="space-y-1.5"><Label>Deliverable files (up to 8, max 20MB each)</Label><Input type="file" multiple accept=".pdf,.docx,.zip,image/*,.txt,.md,.csv,.json,.js,.jsx,.ts,.tsx,.py,.java,.go,.rs,.sql,.yaml,.yml,.html,.css" onChange={(e) => setFiles(e.target.files)} /><p className="text-xs text-muted-foreground">AI inspects PDF, DOCX, screenshots, ZIP/source code and text files. Website links and public GitHub repositories are fetched securely on the server.</p></div>
       <Button onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit for review"}</Button>
     </div>
   );
