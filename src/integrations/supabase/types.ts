@@ -19,11 +19,13 @@ export type Database = {
           confidence: number
           created_at: string
           id: string
+          inspected_evidence: Json
           issues: Json
           missing_requirements: Json
           model: string
           project_id: string
           recommendation: string
+          requirement_results: Json
           requirements_checked: Json
           requirements_satisfied: Json
           submission_id: string
@@ -33,11 +35,13 @@ export type Database = {
           confidence?: number
           created_at?: string
           id?: string
+          inspected_evidence?: Json
           issues?: Json
           missing_requirements?: Json
           model: string
           project_id: string
           recommendation: string
+          requirement_results?: Json
           requirements_checked?: Json
           requirements_satisfied?: Json
           submission_id: string
@@ -47,11 +51,13 @@ export type Database = {
           confidence?: number
           created_at?: string
           id?: string
+          inspected_evidence?: Json
           issues?: Json
           missing_requirements?: Json
           model?: string
           project_id?: string
           recommendation?: string
+          requirement_results?: Json
           requirements_checked?: Json
           requirements_satisfied?: Json
           submission_id?: string
