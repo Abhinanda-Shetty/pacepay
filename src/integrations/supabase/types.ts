@@ -74,6 +74,44 @@ export type Database = {
           },
         ]
       }
+      applications: {
+        Row: {
+          cover_letter: string
+          created_at: string
+          freelancer_id: string
+          id: string
+          project_id: string
+          proposed_amount: number | null
+          status: string
+        }
+        Insert: {
+          cover_letter: string
+          created_at?: string
+          freelancer_id: string
+          id?: string
+          project_id: string
+          proposed_amount?: number | null
+          status?: string
+        }
+        Update: {
+          cover_letter?: string
+          created_at?: string
+          freelancer_id?: string
+          id?: string
+          project_id?: string
+          proposed_amount?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approvals: {
         Row: {
           approved_by: string
@@ -125,6 +163,69 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          created_at: string
+          id: string
+          milestone_id: string
+          opened_by: string
+          outcome: string | null
+          project_id: string
+          reason: string
+          refund_amount: number | null
+          requested_refund: number | null
+          resolution_notes: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          milestone_id: string
+          opened_by: string
+          outcome?: string | null
+          project_id: string
+          reason: string
+          refund_amount?: number | null
+          requested_refund?: number | null
+          resolution_notes?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          milestone_id?: string
+          opened_by?: string
+          outcome?: string | null
+          project_id?: string
+          reason?: string
+          refund_amount?: number | null
+          requested_refund?: number | null
+          resolution_notes?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -221,6 +322,7 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          capture_claimed_at: string | null
           created_at: string
           currency: string
           id: string
@@ -231,11 +333,14 @@ export type Database = {
           paypal_order_id: string | null
           project_id: string
           raw: Json | null
+          refunded_amount: number
           status: Database["public"]["Enums"]["payment_status"]
+          status_detail: string | null
           updated_at: string
         }
         Insert: {
           amount: number
+          capture_claimed_at?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -246,11 +351,14 @@ export type Database = {
           paypal_order_id?: string | null
           project_id: string
           raw?: Json | null
+          refunded_amount?: number
           status?: Database["public"]["Enums"]["payment_status"]
+          status_detail?: string | null
           updated_at?: string
         }
         Update: {
           amount?: number
+          capture_claimed_at?: string | null
           created_at?: string
           currency?: string
           id?: string
@@ -261,7 +369,9 @@ export type Database = {
           paypal_order_id?: string | null
           project_id?: string
           raw?: Json | null
+          refunded_amount?: number
           status?: Database["public"]["Enums"]["payment_status"]
+          status_detail?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -308,6 +418,7 @@ export type Database = {
       projects: {
         Row: {
           budget: number
+          category: string
           client_id: string
           created_at: string
           currency: string
@@ -316,7 +427,9 @@ export type Database = {
           freelancer_email: string | null
           freelancer_id: string | null
           id: string
+          is_public: boolean
           requirements: string
+          skills: string[]
           start_date: string | null
           status: Database["public"]["Enums"]["project_status"]
           title: string
@@ -324,6 +437,7 @@ export type Database = {
         }
         Insert: {
           budget?: number
+          category?: string
           client_id: string
           created_at?: string
           currency?: string
@@ -332,7 +446,9 @@ export type Database = {
           freelancer_email?: string | null
           freelancer_id?: string | null
           id?: string
+          is_public?: boolean
           requirements?: string
+          skills?: string[]
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           title: string
@@ -340,6 +456,7 @@ export type Database = {
         }
         Update: {
           budget?: number
+          category?: string
           client_id?: string
           created_at?: string
           currency?: string
@@ -348,13 +465,114 @@ export type Database = {
           freelancer_email?: string | null
           freelancer_id?: string | null
           id?: string
+          is_public?: boolean
           requirements?: string
+          skills?: string[]
           start_date?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      ratings: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          project_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refunds: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          dispute_id: string | null
+          id: string
+          payment_id: string
+          paypal_refund_id: string | null
+          project_id: string
+          raw: Json | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          dispute_id?: string | null
+          id?: string
+          payment_id: string
+          paypal_refund_id?: string | null
+          project_id: string
+          raw?: Json | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          dispute_id?: string | null
+          id?: string
+          payment_id?: string
+          paypal_refund_id?: string | null
+          project_id?: string
+          raw?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {
@@ -430,6 +648,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_application: {
+        Args: { _application_id: string }
+        Returns: undefined
+      }
       can_access_project: { Args: { _project_id: string }; Returns: boolean }
       decide_milestone: {
         Args: { _approve: boolean; _comments: string; _submission_id: string }
@@ -442,9 +664,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       is_project_client: { Args: { _project_id: string }; Returns: boolean }
       is_project_freelancer: { Args: { _project_id: string }; Returns: boolean }
       join_project: { Args: { _project_id: string }; Returns: undefined }
+      reject_application: {
+        Args: { _application_id: string }
+        Returns: undefined
+      }
+      user_rating: {
+        Args: { _user_id: string }
+        Returns: {
+          avg_rating: number
+          rating_count: number
+        }[]
+      }
+      withdraw_application: {
+        Args: { _application_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "client" | "freelancer" | "admin"
