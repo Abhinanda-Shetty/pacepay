@@ -102,7 +102,6 @@ Hard limits and guardrails: at most 8 files and 5 links per review; 20 MB per fi
 | `src/lib/ai.server.ts` | Structured AI calls through the Lovable AI Gateway. |
 | `src/lib/analytics.ts` | Money totals, per currency. |
 | `src/lib/project-access.ts` | Which projects are yours vs. a pending invite vs. someone else's job-board post. |
-| `src/lib/project-access.ts` + DB triggers | Guardrails below. |
 | `src/routes/api/public/paypal/webhook.ts` | Signature-verified webhook reconciliation. |
 | `src/components/AIReview.tsx` | Requirement-wise report UI. |
 | `drizzle/migrations/*.sql` | Schema, grants, RLS policies, functions, triggers. |
@@ -115,7 +114,7 @@ Hard limits and guardrails: at most 8 files and 5 links per review; 20 MB per fi
 - `profiles` are visible only to yourself and your project collaborators.
 - `ai_reviews`, `payments`, paid status and system notifications are read-only for signed-in users; only server functions write them.
 - Milestone approval/revision runs only through `decide_milestone`; a freelancer cannot approve their own submission.
-- A project cannot be completed while a milestone is unpaid and undisputed-refunded.
+- A project cannot be completed while any of its milestones is still unpaid (and not covered by a refund).
 - One open dispute per milestone; only admins resolve; ratings only after completion, one per project per reviewer.
 
 ---
