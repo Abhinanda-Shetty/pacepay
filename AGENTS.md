@@ -33,5 +33,8 @@ use the editor.
 - Privileged writes (ai_reviews, payments, paid status, system notifications) go through server functions in src/lib/pacepay.functions.ts using the admin client after an RLS-scoped authorization check; authenticated users have read-only grants on those tables so the browser can't forge them.
 - Milestone approval/revision runs only through the `decide_milestone` DB function; freelancers join via `join_project` (invite matched by email).
 - PayPal calls go through the connector gateway (src/lib/paypal.server.ts); payment amount always comes from the approved milestone row, never the client.
+- Payment state changes only via syncPayment (src/lib/payments.server.ts), which re-reads the order from PayPal and applies pure rules in src/lib/payment-rules.ts; unique indexes allow one active attempt and one captured payment per milestone, and capture is guarded by an atomic claim plus PayPal-Request-Id — prevents duplicate orders/captures.
+- Disputes are resolved only by admins via resolveDispute; refunds are issued server-side against the stored capture ID. Admin role is assigned manually (users can self-pick only client/freelancer).
+- Freelancers are assigned either by invite (join_project) or by accept_application; the guard trigger allows only those paths.
 - AI agents use src/lib/ai.server.ts (streamed Responses call with strict structured output); AI is advisory and never changes approval or payment state.
 - DB guards: new milestones must be inserted as `pending`, a project's assigned freelancer/client can't be changed after assignment (trigger `guard_project_freelancer`), projects with payments can't be deleted, and profiles are visible only to self and project collaborators — keeps the approve→pay flow and payee un-bypassable.

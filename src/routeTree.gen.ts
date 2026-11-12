@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAiRouteImport } from './routes/_authenticated/ai'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -37,6 +39,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -45,6 +52,11 @@ const AuthenticatedAiRoute = AuthenticatedAiRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -96,8 +108,10 @@ const ApiPublicPaypalWebhookRoute = ApiPublicPaypalWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/ai': typeof AuthenticatedAiRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/jobs': typeof AuthenticatedJobsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -110,8 +124,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/ai': typeof AuthenticatedAiRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/jobs': typeof AuthenticatedJobsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -126,8 +142,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/ai': typeof AuthenticatedAiRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -142,8 +160,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin'
     | '/ai'
     | '/dashboard'
+    | '/jobs'
     | '/notifications'
     | '/payments'
     | '/settings'
@@ -156,8 +176,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin'
     | '/ai'
     | '/dashboard'
+    | '/jobs'
     | '/notifications'
     | '/payments'
     | '/settings'
@@ -171,8 +193,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin'
     | '/_authenticated/ai'
     | '/_authenticated/dashboard'
+    | '/_authenticated/jobs'
     | '/_authenticated/notifications'
     | '/_authenticated/payments'
     | '/_authenticated/settings'
@@ -213,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ai': {
       id: '/_authenticated/ai'
       path: '/ai'
@@ -225,6 +256,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/jobs': {
+      id: '/_authenticated/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof AuthenticatedJobsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications': {
@@ -287,8 +325,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAiRoute: typeof AuthenticatedAiRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -299,8 +339,10 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAiRoute: AuthenticatedAiRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedJobsRoute: AuthenticatedJobsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

@@ -29,18 +29,21 @@ export const Route = createFileRoute("/api/public/paypal/webhook")({
         } catch {
           return new Response("Verification failed", { status: 400 });
         }
+        // Signature verified. Never trust the event body for status: re-read the order from PayPal and reconcile.
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const r = event.resource ?? {};
-        const orderId = r.supplementary_data?.related_ids?.order_id;
-        if (orderId && event.event_type?.startsWith("PAYMENT.CAPTURE.")) {
-          const status = event.event_type === "PAYMENT.CAPTURE.COMPLETED" ? "completed" : event.event_type === "PAYMENT.CAPTURE.PENDING" ? "approved" : "failed";
-          const { data: pay } = await supabaseAdmin.from("payments").select("*").eq("paypal_order_id", orderId).maybeSingle();
-          if (pay && pay.status !== "completed") {
-            const amountOk = Number(r.amount?.value) === Number(pay.amount) && r.amount?.currency_code === pay.currency;
-            const finalStatus = status === "completed" && !amountOk ? "failed" : status;
-            await supabaseAdmin.from("payments").update({ status: finalStatus, paypal_capture_id: r.id, updated_at: new Date().toISOString() }).eq("id", pay.id);
-            if (finalStatus === "completed") await supabaseAdmin.from("milestones").update({ status: "paid" }).eq("id", pay.milestone_id);
-          }
+        const type: string = event.event_type ?? "";
+        let pay: any = null;
+        if (type.startsWith("PAYMENT.CAPTURE.") || type.startsWith("CHECKOUT.ORDER.")) {
+          const orderId = type.startsWith("CHECKOUT.ORDER.") ? r.id : r.supplementary_data?.related_ids?.order_id;
+          const upHref: string | undefined = (r.links ?? []).find((l: any) => l.rel === "up")?.href;
+          const captureId = type === "PAYMENT.CAPTURE.REFUNDED" || type === "PAYMENT.CAPTURE.REVERSED" ? upHref?.split("/").pop() : r.id;
+          if (orderId) pay = (await supabaseAdmin.from("payments").select("*").eq("paypal_order_id", orderId).maybeSingle()).data;
+          if (!pay && captureId) pay = (await supabaseAdmin.from("payments").select("*").eq("paypal_capture_id", captureId).maybeSingle()).data;
+        }
+        if (pay) {
+          const { syncPayment } = await import("@/lib/payments.server");
+          try { await syncPayment(pay); } catch (e) { console.error("Webhook reconcile failed", String(e)); return new Response("Retry", { status: 500 }); }
         }
         return new Response("ok");
       },

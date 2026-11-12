@@ -24,7 +24,7 @@ function NewProject() {
   const { data: me } = useMe();
   const navigate = useNavigate();
   const plan = useServerFn(planProject);
-  const [f, setF] = useState({ title: "", description: "", requirements: "", budget: 1000, currency: "USD", deadline: "", freelancer_email: "" });
+  const [f, setF] = useState({ title: "", description: "", requirements: "", budget: 1000, currency: "USD", deadline: "", freelancer_email: "", is_public: false, category: "", skills: "" });
   const [ms, setMs] = useState<M[]>([]);
   const [risks, setRisks] = useState<string[]>([]);
   const [planning, setPlanning] = useState(false);
@@ -54,7 +54,7 @@ function NewProject() {
     setSaving(true);
     const { data: p, error } = await supabase
       .from("projects")
-      .insert({ title: f.title, description: f.description, requirements: f.requirements, budget: Number(f.budget), currency: f.currency, deadline: f.deadline || null, freelancer_email: f.freelancer_email.trim() || null, client_id: me!.user.id, start_date: new Date().toISOString().slice(0, 10) })
+      .insert({ title: f.title, description: f.description, requirements: f.requirements, budget: Number(f.budget), currency: f.currency, deadline: f.deadline || null, freelancer_email: f.freelancer_email.trim() || null, is_public: f.is_public, category: f.category.trim(), skills: f.skills.split(",").map((x) => x.trim()).filter(Boolean).slice(0, 15), client_id: me!.user.id, start_date: new Date().toISOString().slice(0, 10) })
       .select()
       .single();
     if (error || !p) { setSaving(false); { toast.error(error?.message ?? "Failed"); return; } }
@@ -79,6 +79,9 @@ function NewProject() {
         <div className="space-y-1.5"><Label>Currency</Label><Input value={f.currency} maxLength={3} onChange={(e) => setF({ ...f, currency: e.target.value.toUpperCase() })} /></div>
         <div className="space-y-1.5"><Label>Deadline</Label><Input type="date" value={f.deadline} onChange={(e) => setF({ ...f, deadline: e.target.value })} /></div>
         <div className="space-y-1.5"><Label>Freelancer email (invite)</Label><Input type="email" value={f.freelancer_email} onChange={(e) => setF({ ...f, freelancer_email: e.target.value })} placeholder="freelancer@example.com" /></div>
+        <div className="space-y-1.5"><Label>Category</Label><Input value={f.category} maxLength={60} onChange={(e) => setF({ ...f, category: e.target.value })} placeholder="Web design" /></div>
+        <div className="space-y-1.5"><Label>Skills (comma separated)</Label><Input value={f.skills} onChange={(e) => setF({ ...f, skills: e.target.value })} placeholder="React, Figma" /></div>
+        <label className="flex items-center gap-2 text-sm md:col-span-2"><input type="checkbox" checked={f.is_public} onChange={(e) => setF({ ...f, is_public: e.target.checked })} /> Post on the job board so freelancers can apply</label>
       </div>
 
       <div className="space-y-4">

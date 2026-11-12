@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Sparkles, Loader2, Paperclip, Link2, CheckCircle2, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
-import { reviewSubmission } from "@/lib/pacepay.functions";
+import { reviewSubmission, reconcilePayment } from "@/lib/pacepay.functions";
 import { money, date } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PayPalButton } from "@/components/PayPalButton";
@@ -37,14 +37,18 @@ function MilestonePage() {
       const { data: subs } = await supabase.from("submissions").select("*, ai_reviews(*)").eq("milestone_id", milestoneId).order("version", { ascending: false });
       const { data: approvals } = await supabase.from("approvals").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
       const { data: payments } = await supabase.from("payments").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
-      return { m, subs: subs ?? [], approvals: approvals ?? [], payments: payments ?? [] };
+      const { data: disputes } = await supabase.from("disputes").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
+      const payIds = (payments ?? []).map((x) => x.id);
+      const { data: refunds } = payIds.length ? await supabase.from("refunds").select("*").in("payment_id", payIds).order("created_at", { ascending: false }) : { data: [] };
+      return { m, subs: subs ?? [], approvals: approvals ?? [], payments: payments ?? [], disputes: disputes ?? [], refunds: refunds ?? [] };
     },
   });
   const refresh = () => qc.invalidateQueries();
   const [reviewing, setReviewing] = useState<string | null>(null);
 
   if (!data?.m) return <p className="text-muted-foreground">Loading…</p>;
-  const { m, subs, approvals, payments } = data;
+  const { m, subs, approvals, payments, disputes, refunds } = data;
+  const openDispute = disputes.find((d) => d.status === "open");
   const p = m.projects as any;
   const isClient = me?.user.id === p.client_id;
   const isFreelancer = me?.user.id === p.freelancer_id;
@@ -75,7 +79,7 @@ function MilestonePage() {
 
       {isClient && m.status === "submitted" && latest && <Decision submissionId={latest.id} onDone={refresh} />}
 
-      {isClient && m.status === "approved" && (
+      {isClient && m.status === "approved" && !openDispute && (
         <div className="rounded-2xl border border-primary/40 bg-card p-6">
           <h2 className="text-lg font-semibold">Pay this milestone</h2>
           <p className="mt-1 text-sm text-muted-foreground">You'll pay <b className="text-foreground">{money(m.amount, m.currency)}</b> for “{m.title}” via PayPal Sandbox. The amount comes from the approved milestone and can't be changed here. Status updates only after PayPal confirms the capture.</p>
@@ -88,12 +92,21 @@ function MilestonePage() {
           <h2 className="mb-3 font-semibold">Payment status</h2>
           {payments.map((pay) => (
             <div key={pay.id} className="flex flex-wrap items-center justify-between gap-2 py-1 text-sm">
-              <span className="font-mono text-xs text-muted-foreground">Order {pay.paypal_order_id}{pay.paypal_capture_id ? ` · Capture ${pay.paypal_capture_id}` : ""}</span>
-              <span className="flex items-center gap-2"><span className="font-mono">{money(pay.amount, pay.currency)}</span><StatusBadge status={pay.status} /></span>
+              <span className="font-mono text-xs text-muted-foreground">Order {pay.paypal_order_id ?? "—"}{pay.paypal_capture_id ? ` · Capture ${pay.paypal_capture_id}` : ""}{pay.status_detail ? ` · ${pay.status_detail}` : ""}</span>
+              <span className="flex items-center gap-2"><span className="font-mono">{money(pay.amount, pay.currency)}{Number(pay.refunded_amount) > 0 ? ` (−${money(pay.refunded_amount, pay.currency)})` : ""}</span><StatusBadge status={pay.status} />{["created", "approved", "pending"].includes(pay.status) && pay.paypal_order_id && <CheckButton id={pay.id} onDone={refresh} />}</span>
             </div>
           ))}
         </div>
       )}
+
+      {refunds.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <h2 className="mb-3 font-semibold">Refunds</h2>
+          {refunds.map((r) => <div key={r.id} className="flex justify-between py-1 text-sm"><span className="font-mono text-xs text-muted-foreground">{date(r.created_at)} · Refund {r.paypal_refund_id ?? "—"}</span><span className="font-mono">{money(r.amount, r.currency)} · {r.status.toLowerCase()}</span></div>)}
+        </div>
+      )}
+
+      <Disputes m={m} disputes={disputes} canOpen={(isClient || isFreelancer) && !openDispute && ["submitted", "revision_requested", "approved", "paid"].includes(m.status)} isClient={isClient} userId={me?.user.id} onDone={refresh} />
 
       <div>
         <h2 className="mb-3 text-xl font-semibold">Submission history</h2>
@@ -202,6 +215,46 @@ function Decision({ submissionId, onDone }: { submissionId: string; onDone: () =
         </AlertDialog>
         <Button variant="outline" onClick={() => decide(false)}><RotateCcw className="mr-2 h-4 w-4" />Request revision</Button>
       </div>
+    </div>
+  );
+}
+
+function CheckButton({ id, onDone }: { id: string; onDone: () => void }) {
+  const check = useServerFn(reconcilePayment);
+  const [busy, setBusy] = useState(false);
+  return <Button size="sm" variant="outline" disabled={busy} onClick={async () => { setBusy(true); try { const r = await check({ data: { paymentId: id } }); toast.info(`PayPal status: ${r.status.replace(/_/g, " ")}`); onDone(); } catch (e: any) { toast.error(e.message); } setBusy(false); }}>Check with PayPal</Button>;
+}
+
+function Disputes({ m, disputes, canOpen, isClient, userId, onDone }: { m: any; disputes: any[]; canOpen: boolean; isClient: boolean; userId: string | undefined; onDone: () => void }) {
+  const [reason, setReason] = useState("");
+  const [refund, setRefund] = useState("");
+  const [show, setShow] = useState(false);
+  async function open() {
+    if (reason.trim().length < 10) { toast.error("Explain the problem (10+ characters)"); return; }
+    const { error } = await supabase.from("disputes").insert({ project_id: m.project_id, milestone_id: m.id, opened_by: userId!, reason: reason.trim(), requested_refund: m.status === "paid" && isClient && refund ? Number(refund) : null });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Dispute opened. A PacePay admin will review it.");
+    setShow(false); setReason(""); setRefund(""); onDone();
+  }
+  if (!disputes.length && !canOpen) return null;
+  return (
+    <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between"><h2 className="font-semibold">Disputes</h2>{canOpen && !show && <Button size="sm" variant="outline" onClick={() => setShow(true)}>{m.status === "paid" && isClient ? "Request a refund" : "Open a dispute"}</Button>}</div>
+      {show && (
+        <div className="space-y-3">
+          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="What went wrong? Which requirements weren't met?" />
+          {m.status === "paid" && isClient && <div className="space-y-1.5"><Label>Refund you're asking for ({m.currency}, optional)</Label><Input type="number" min={0} max={m.amount} value={refund} onChange={(e) => setRefund(e.target.value)} /></div>}
+          <p className="text-xs text-muted-foreground">An admin reviews the reason and the completed work, then decides. Payment is paused while a dispute is open.</p>
+          <div className="flex gap-2"><Button size="sm" onClick={open}>Submit</Button><Button size="sm" variant="ghost" onClick={() => setShow(false)}>Cancel</Button></div>
+        </div>
+      )}
+      {disputes.map((d) => (
+        <div key={d.id} className="rounded-lg bg-secondary p-3 text-sm">
+          <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{date(d.created_at)}</span><StatusBadge status={d.status} /></div>
+          <p className="mt-1 whitespace-pre-wrap">{d.reason}</p>
+          {d.status === "resolved" && <p className="mt-2"><b>Decision:</b> {d.outcome?.replace(/_/g, " ")}{d.refund_amount ? ` (${money(d.refund_amount, m.currency)})` : ""} — {d.resolution_notes}</p>}
+        </div>
+      ))}
     </div>
   );
 }

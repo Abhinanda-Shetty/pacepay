@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { LayoutDashboard, FolderKanban, Sparkles, CreditCard, Bell, Settings, LogOut, Briefcase, UserRound } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Sparkles, CreditCard, Bell, Settings, LogOut, Briefcase, UserRound, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, type Role } from "@/hooks/use-me";
@@ -18,9 +18,11 @@ export const Route = createFileRoute("/_authenticated")({
   component: AppShell,
 });
 
-const nav = [
+const allNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projects", icon: FolderKanban },
+  { to: "/jobs", label: "Job board", icon: Search },
+  { to: "/admin", label: "Disputes", icon: ShieldCheck },
   { to: "/ai", label: "AI Workflow", icon: Sparkles },
   { to: "/payments", label: "Payments", icon: CreditCard },
   { to: "/notifications", label: "Notifications", icon: Bell },
@@ -42,11 +44,12 @@ function AppShell() {
 
   if (isLoading || !me) return <div className="min-h-screen bg-background" />;
   if (!me.role) return <Onboarding userId={me.user.id} onDone={() => refetch()} />;
+  const nav = allNav.filter((n) => (n.to === "/admin" ? me.role === "admin" : true));
 
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 md:flex">
-        <Link to="/dashboard" className="mb-8 px-2"><Logo /></Link>
+        <div className="mb-8 px-2"><Logo /></div>
         <nav className="flex flex-1 flex-col gap-1">
           {nav.map((n) => {
             const active = path.startsWith(n.to);
