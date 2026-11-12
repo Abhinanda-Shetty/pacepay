@@ -124,11 +124,10 @@ function MilestonePage() {
                 <p className="mt-2 whitespace-pre-wrap text-sm">{s.description}</p>
                 <Evidence urls={s.evidence_urls} files={s.evidence_files} />
                 {appr?.comments && <p className="mt-3 rounded-lg bg-secondary p-3 text-sm"><b>Client:</b> {appr.comments}</p>}
-                {ai ? <AIReview r={ai} /> : (
-                  <Button size="sm" variant="outline" className="mt-4" disabled={reviewing === s.id} onClick={() => runReview(s.id)}>
-                    {reviewing === s.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Run AI review
-                  </Button>
-                )}
+                {reviews.map((ai, index) => <AIReview key={ai.id} r={ai} defaultOpen={index === 0} />)}
+                <Button size="sm" variant="outline" className="mt-4" disabled={reviewing === s.id} onClick={() => runReview(s.id)}>
+                  {reviewing === s.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}{reviewing === s.id ? "Inspecting deliverables…" : reviews.length ? "Reinspect deliverables" : "Run AI deliverable verification"}
+                </Button>
               </div>
             );
           })}
