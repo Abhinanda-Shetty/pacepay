@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isOwnProject, isPendingInvite } from "@/lib/project-access";
+import { getOwnProjects, isOwnProject, isPendingInvite } from "@/lib/project-access";
 
 const publicJob = { client_id: "client-1", freelancer_id: null, freelancer_email: null };
 
