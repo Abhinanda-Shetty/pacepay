@@ -46,7 +46,7 @@ function AppShell() {
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 md:flex">
-        <Link to="/dashboard" className="mb-8 px-2"><Logo /></Link>
+        <div className="mb-8 px-2"><Logo /></div>
         <nav className="flex flex-1 flex-col gap-1">
           {nav.map((n) => {
             const active = path.startsWith(n.to);

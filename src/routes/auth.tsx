@@ -65,7 +65,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background bg-hero p-6">
       <div className="w-full max-w-sm">
-        <Link to="/" className="flex justify-center"><Logo /></Link>
+        <div className="flex justify-center"><Logo /></div>
         <div className="mt-8 rounded-2xl border border-border bg-card p-6">
           {sent ? (
             <div className="text-center">
