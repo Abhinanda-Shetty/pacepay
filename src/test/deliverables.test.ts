@@ -20,13 +20,13 @@ describe("deliverable inspection", () => {
 
   it("rejects a fake PDF instead of trusting its filename", async () => {
     const result = await inspectDeliverables({ files: ["project/milestone/fake.pdf"], urls: [], download: async () => strToU8("not a pdf") });
-    expect(result.inspections[0].status).toBe("UNABLE_TO_INSPECT");
-    expect(result.inspections[0].detail).toContain("valid PDF header");
+    expect(result.inspections[0]!.status).toBe("UNABLE_TO_INSPECT");
+    expect(result.inspections[0]!.detail).toContain("valid PDF header");
   });
 
   it("blocks local website URLs from server-side fetching", async () => {
     const result = await inspectDeliverables({ files: [], urls: ["http://127.0.0.1/private"], download: async () => strToU8("") });
-    expect(result.inspections[0].status).toBe("UNABLE_TO_INSPECT");
-    expect(result.inspections[0].detail).toContain("Private or local URLs");
+    expect(result.inspections[0]!.status).toBe("UNABLE_TO_INSPECT");
+    expect(result.inspections[0]!.detail).toContain("Private or local URLs");
   });
 });
