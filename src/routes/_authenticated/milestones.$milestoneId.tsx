@@ -57,7 +57,7 @@ function MilestonePage() {
 
   async function runReview(id: string) {
     setReviewing(id);
-    try { await review({ data: { submissionId: id } }); toast.success("AI review complete"); refresh(); }
+    try { await review({ data: { submissionId: id } }); toast.success("AI deliverable verification complete"); refresh(); }
     catch (e: any) { toast.error(e.message); }
     finally { setReviewing(null); }
   }
@@ -113,7 +113,7 @@ function MilestonePage() {
         {subs.length === 0 && <p className="text-sm text-muted-foreground">No submissions yet.</p>}
         <div className="space-y-4">
           {subs.map((s) => {
-            const ai = ((s.ai_reviews as any[]) ?? []).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+            const reviews = ((s.ai_reviews as any[]) ?? []).sort((a, b) => b.created_at.localeCompare(a.created_at));
             const appr = approvals.find((a) => a.submission_id === s.id);
             return (
               <div key={s.id} className="rounded-2xl border border-border bg-card p-5">

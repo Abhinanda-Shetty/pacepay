@@ -23,6 +23,13 @@ const tone: Record<string, string> = {
   APPROVE: "bg-primary/15 text-primary",
   REVISION_REQUIRED: "bg-destructive/15 text-destructive",
   MANUAL_REVIEW: "bg-warning/15 text-warning",
+  VERIFIED: "bg-primary/15 text-primary",
+  PARTIALLY_VERIFIED: "bg-warning/15 text-warning",
+  NOT_VERIFIED: "bg-destructive/15 text-destructive",
+  UNABLE_TO_VERIFY: "bg-muted text-muted-foreground",
+  INSPECTED: "bg-primary/15 text-primary",
+  PARTIALLY_INSPECTED: "bg-warning/15 text-warning",
+  UNABLE_TO_INSPECT: "bg-destructive/15 text-destructive",
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
