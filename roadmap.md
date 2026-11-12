@@ -5,3 +5,10 @@
 - [x] 4. PayPal sandbox hardening: one active order per milestone, single capture, separate capture ID, pending/failed/cancelled/refunded, webhook reconciliation
 - [x] 5. Use uploaded image as official logo; clicking logo goes to landing page
 - [ ] Admin account: user must say which email becomes admin
+- [ ] Freelancer dashboard: Earned total and completed-project timeline
+- [ ] Job-board projects must not appear as pending invites or trigger invite notifications
+- [ ] Settings: add clear account actions including sign out
+- [ ] Home/header logo: use the uploaded combined mark-and-wordmark image only
+- [ ] AI deliverable verification: inspect files, screenshots, websites and public GitHub repos on the backend
+- [ ] Requirement-wise AI reports, evidence details, resubmission history and reinspection
+- [ ] End-to-end verification without changing client approval authority or PayPal Sandbox behavior
