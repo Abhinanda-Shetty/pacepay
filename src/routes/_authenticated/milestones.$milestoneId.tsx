@@ -38,7 +38,8 @@ function MilestonePage() {
       const { data: approvals } = await supabase.from("approvals").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
       const { data: payments } = await supabase.from("payments").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
       const { data: disputes } = await supabase.from("disputes").select("*").eq("milestone_id", milestoneId).order("created_at", { ascending: false });
-      const { data: refunds } = await supabase.from("refunds").select("*, payments!inner(milestone_id)").eq("payments.milestone_id", milestoneId).order("created_at", { ascending: false });
+      const payIds = (payments ?? []).map((x) => x.id);
+      const { data: refunds } = payIds.length ? await supabase.from("refunds").select("*").in("payment_id", payIds).order("created_at", { ascending: false }) : { data: [] };
       return { m, subs: subs ?? [], approvals: approvals ?? [], payments: payments ?? [], disputes: disputes ?? [], refunds: refunds ?? [] };
     },
   });
