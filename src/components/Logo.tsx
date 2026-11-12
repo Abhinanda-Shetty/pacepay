@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoFull from "@/assets/pacepay-logo-full.jpeg.asset.json";
+import logoFull from "@/assets/pacepay-logo-full-cropped.jpg.asset.json";
 
 export function Logo() {
   return (

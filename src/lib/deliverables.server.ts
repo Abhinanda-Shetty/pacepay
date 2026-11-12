@@ -118,7 +118,11 @@ async function fetchWebsite(raw: string) {
     const bytes = new Uint8Array(size);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-    return { url: url.toString(), text: clip(cleanText(new TextDecoder().decode(bytes)), 70_000) };
+    const rawText = new TextDecoder().decode(bytes);
+    const semanticText = /text\/html/i.test(type)
+      ? rawText.replace(/<h([1-6])\b[^>]*>/gi, "\n[HEADING $1] ").replace(/<\/h[1-6]>/gi, " [/HEADING]\n").replace(/<button\b[^>]*>/gi, "\n[BUTTON] ").replace(/<\/button>/gi, " [/BUTTON]\n")
+      : rawText;
+    return { url: url.toString(), text: clip(cleanText(semanticText), 70_000) };
   }
   throw new Error("Too many website redirects");
 }
