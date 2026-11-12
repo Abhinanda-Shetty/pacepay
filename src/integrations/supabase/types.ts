@@ -447,7 +447,7 @@ export type Database = {
       join_project: { Args: { _project_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "client" | "freelancer"
+      app_role: "client" | "freelancer" | "admin"
       milestone_status:
         | "pending"
         | "in_progress"
@@ -455,7 +455,16 @@ export type Database = {
         | "revision_requested"
         | "approved"
         | "paid"
-      payment_status: "created" | "approved" | "completed" | "failed"
+        | "refunded"
+      payment_status:
+        | "created"
+        | "approved"
+        | "completed"
+        | "failed"
+        | "pending"
+        | "cancelled"
+        | "refunded"
+        | "partially_refunded"
       project_status: "draft" | "active" | "completed" | "cancelled"
     }
     CompositeTypes: {
@@ -584,7 +593,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["client", "freelancer"],
+      app_role: ["client", "freelancer", "admin"],
       milestone_status: [
         "pending",
         "in_progress",
@@ -592,8 +601,18 @@ export const Constants = {
         "revision_requested",
         "approved",
         "paid",
+        "refunded",
       ],
-      payment_status: ["created", "approved", "completed", "failed"],
+      payment_status: [
+        "created",
+        "approved",
+        "completed",
+        "failed",
+        "pending",
+        "cancelled",
+        "refunded",
+        "partially_refunded",
+      ],
       project_status: ["draft", "active", "completed", "cancelled"],
     },
   },
