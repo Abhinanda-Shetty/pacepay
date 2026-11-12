@@ -57,7 +57,7 @@ function MilestonePage() {
 
   async function runReview(id: string) {
     setReviewing(id);
-    try { await review({ data: { submissionId: id } }); toast.success("AI review complete"); refresh(); }
+    try { await review({ data: { submissionId: id } }); toast.success("AI deliverable verification complete"); refresh(); }
     catch (e: any) { toast.error(e.message); }
     finally { setReviewing(null); }
   }
@@ -113,7 +113,7 @@ function MilestonePage() {
         {subs.length === 0 && <p className="text-sm text-muted-foreground">No submissions yet.</p>}
         <div className="space-y-4">
           {subs.map((s) => {
-            const ai = ((s.ai_reviews as any[]) ?? []).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+            const reviews = ((s.ai_reviews as any[]) ?? []).sort((a, b) => b.created_at.localeCompare(a.created_at));
             const appr = approvals.find((a) => a.submission_id === s.id);
             return (
               <div key={s.id} className="rounded-2xl border border-border bg-card p-5">
@@ -124,11 +124,10 @@ function MilestonePage() {
                 <p className="mt-2 whitespace-pre-wrap text-sm">{s.description}</p>
                 <Evidence urls={s.evidence_urls} files={s.evidence_files} />
                 {appr?.comments && <p className="mt-3 rounded-lg bg-secondary p-3 text-sm"><b>Client:</b> {appr.comments}</p>}
-                {ai ? <AIReview r={ai} /> : (
-                  <Button size="sm" variant="outline" className="mt-4" disabled={reviewing === s.id} onClick={() => runReview(s.id)}>
-                    {reviewing === s.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Run AI review
-                  </Button>
-                )}
+                {reviews.map((ai, index) => <AIReview key={ai.id} r={ai} defaultOpen={index === 0} />)}
+                <Button size="sm" variant="outline" className="mt-4" disabled={reviewing === s.id} onClick={() => runReview(s.id)}>
+                  {reviewing === s.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}{reviewing === s.id ? "Inspecting deliverables…" : reviews.length ? "Reinspect deliverables" : "Run AI deliverable verification"}
+                </Button>
               </div>
             );
           })}
@@ -164,6 +163,10 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
   const [busy, setBusy] = useState(false);
   async function submit() {
     if (desc.trim().length < 10) { toast.error("Describe what you delivered (10+ characters)"); return; }
+    const evidence_urls = urls.split(/\s+/).map((u) => u.trim()).filter(Boolean);
+    if (evidence_urls.length > 5 || evidence_urls.some((u) => !/^https?:\/\/\S+$/i.test(u))) { toast.error("Add up to 5 valid http(s) evidence links"); return; }
+    if ((files?.length ?? 0) > 8) { toast.error("Upload up to 8 files per submission"); return; }
+    if (Array.from(files ?? []).some((f) => f.size > 20 * 1024 * 1024)) { toast.error("Each file must be 20MB or smaller"); return; }
     setBusy(true);
     const paths: string[] = [];
     for (const f of Array.from(files ?? [])) {
@@ -172,7 +175,6 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
       if (error) { setBusy(false); { toast.error(error.message); return; } }
       paths.push(path);
     }
-    const evidence_urls = urls.split(/\s+/).map((u) => u.trim()).filter((u) => /^https?:\/\//.test(u));
     const { data, error } = await supabase.from("submissions").insert({ milestone_id: m.id, project_id: m.project_id, submitted_by: userId, description: desc, evidence_urls, evidence_files: paths, version }).select().single();
     setBusy(false);
     if (error || !data) { toast.error(error?.message ?? "Failed"); return; }
@@ -185,7 +187,7 @@ function SubmitForm({ m, version, userId, onDone }: { m: any; version: number; u
       <h2 className="text-lg font-semibold">Submit work {version > 1 && <span className="font-mono text-sm text-muted-foreground">(v{version})</span>}</h2>
       <div className="space-y-1.5"><Label>What did you deliver?</Label><Textarea rows={5} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Explain how each requirement is met…" /></div>
       <div className="space-y-1.5"><Label>Evidence links (space or newline separated)</Label><Textarea rows={2} value={urls} onChange={(e) => setUrls(e.target.value)} placeholder="https://github.com/… https://staging.example.com" /></div>
-      <div className="space-y-1.5"><Label>Files (max 20MB each)</Label><Input type="file" multiple onChange={(e) => setFiles(e.target.files)} /></div>
+      <div className="space-y-1.5"><Label>Deliverable files (up to 8, max 20MB each)</Label><Input type="file" multiple accept=".pdf,.docx,.zip,image/*,.txt,.md,.csv,.json,.js,.jsx,.ts,.tsx,.py,.java,.go,.rs,.sql,.yaml,.yml,.html,.css" onChange={(e) => setFiles(e.target.files)} /><p className="text-xs text-muted-foreground">AI inspects PDF, DOCX, screenshots, ZIP/source code and text files. Website links and public GitHub repositories are fetched securely on the server.</p></div>
       <Button onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit for review"}</Button>
     </div>
   );

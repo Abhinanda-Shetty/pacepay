@@ -1,12 +1,13 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, Output, NoObjectGeneratedError } from "ai";
 import type { z } from "zod";
+import type { EvidencePart } from "./deliverables.server";
 
 export const AI_MODEL = "openai/gpt-6-astra";
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
 /** Streams a structured Responses call through Lovable AI Gateway and returns the parsed object. */
-export async function runStructured<T>(schema: z.ZodType<T>, instructions: string, prompt: string): Promise<T> {
+export async function runStructured<T>(schema: z.ZodType<T>, instructions: string, prompt: string | EvidencePart[]): Promise<T> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured (missing LOVABLE_API_KEY).");
   let runId: string | undefined;
@@ -35,7 +36,7 @@ export async function runStructured<T>(schema: z.ZodType<T>, instructions: strin
   const result = streamText({
     model: provider.responses(AI_MODEL),
     instructions,
-    prompt,
+    ...(typeof prompt === "string" ? { prompt } : { messages: [{ role: "user" as const, content: prompt }] }),
     output: Output.object({ schema }),
     providerOptions: {
       openai: {

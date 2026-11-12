@@ -6,6 +6,7 @@ import { useMe } from "@/hooks/use-me";
 import { money, date } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { isOwnProject, isPendingInvite } from "@/lib/project-access";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({ meta: [{ title: "Projects — PacePay" }, { name: "description", content: "All your PacePay projects." }, { property: "og:title", content: "Projects — PacePay" }, { property: "og:description", content: "Your projects and invites." }] }),
@@ -19,8 +20,8 @@ function Projects() {
     queryKey: ["projects"],
     queryFn: async () => (await supabase.from("projects").select("*, milestones(status)").order("created_at", { ascending: false })).data ?? [],
   });
-  const invites = projects.filter((p) => !p.freelancer_id && p.client_id !== me?.user.id);
-  const mine = projects.filter((p) => !invites.includes(p));
+  const invites = projects.filter((p) => isPendingInvite(p, me?.user.id ?? "", me?.user.email));
+  const mine = projects.filter((p) => isOwnProject(p, me?.user.id ?? "", me?.role === "admin"));
 
   async function join(id: string) {
     const { error } = await supabase.rpc("join_project", { _project_id: id });
