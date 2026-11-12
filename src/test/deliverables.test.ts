@@ -16,6 +16,7 @@ describe("deliverable inspection", () => {
     });
     const result = extractSourceArchive(archive);
     expect(result.text).toContain("export const verified = true;");
+    expect(result.text).toContain("Hello World");
     expect(result.text).not.toContain("secret dependency");
   });
 
