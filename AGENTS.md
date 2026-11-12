@@ -37,4 +37,5 @@ use the editor.
 - Disputes are resolved only by admins via resolveDispute; refunds are issued server-side against the stored capture ID. Admin role is assigned manually (users can self-pick only client/freelancer).
 - Freelancers are assigned either by invite (join_project) or by accept_application; the guard trigger allows only those paths.
 - AI agents use src/lib/ai.server.ts (streamed Responses call with strict structured output); AI is advisory and never changes approval or payment state.
+- Deliverable evidence is inspected server-side in src/lib/deliverables.server.ts with bounded downloads/archive extraction and public-URL checks; requirement results and inspection manifests remain append-only in ai_reviews so resubmissions and reinspections preserve history.
 - DB guards: new milestones must be inserted as `pending`, a project's assigned freelancer/client can't be changed after assignment (trigger `guard_project_freelancer`), projects with payments can't be deleted, and profiles are visible only to self and project collaborators — keeps the approve→pay flow and payee un-bypassable.
