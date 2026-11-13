@@ -2,6 +2,14 @@
 
 # PacePay
 
+# intro Video
+
+
+
+https://github.com/user-attachments/assets/083b5f28-990d-4976-bebf-5da4a7c6980f
+
+
+
 A freelance marketplace with milestone-based escrow-style payments, AI deliverable verification, and PayPal Sandbox checkout.
 
 Clients post work, AI drafts the milestone plan, freelancers deliver evidence, AI verifies that evidence against the client's own requirements, the client approves, and only then can the client pay through PayPal. Money is never moved by the AI, by a button click, or by a browser request — only by a server-side flow that re-reads the order from PayPal and confirms the amount, currency and capture status first.
